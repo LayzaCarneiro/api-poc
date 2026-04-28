@@ -4,7 +4,7 @@ import pandas as pd
 
 from .database import SessionLocal
 from .models import Dataset
-from .services import detect_schema
+from .services import detect_schema, build_cube
 from .schemas import UploadResponse, DatasetResponse
 
 router = APIRouter()
@@ -59,3 +59,13 @@ def get_dataset(dataset_id: int, db: Session = Depends(get_db)):
         "columns": dataset.schema_json,
         "rows": dataset.rows_json
     }
+
+
+@router.get("/datasets/{dataset_id}/cube")
+def get_cube(dataset_id: int, db: Session = Depends(get_db)):
+    dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()
+
+    return build_cube(
+        dataset.rows_json,
+        dataset.schema_json
+    )

@@ -34,3 +34,43 @@ def suggest_chart(metrics, categories):
     elif metrics == 2:
         return "bubble3d"
     return "grid3d"
+
+# function to transform csv data into a cube format for 3D charts
+def build_cube(rows, schema):
+
+    categories = [c["name"] for c in schema if c["type"] == "category"]
+    metrics = [c["name"] for c in schema if c["type"] == "metric"]
+
+    x_col = categories[0]
+    y_col = categories[1] if len(categories) > 1 else categories[0]
+    z_col = categories[2] if len(categories) > 2 else categories[0]
+    value_col = metrics[0]
+
+    x_map = {}
+    y_map = {}
+    z_map = {}
+
+    cells = []
+
+    for row in rows:
+        xv = row[x_col]
+        yv = row[y_col]
+        zv = row[z_col]
+
+        if xv not in x_map:
+            x_map[xv] = len(x_map)
+
+        if yv not in y_map:
+            y_map[yv] = len(y_map)
+
+        if zv not in z_map:
+            z_map[zv] = len(z_map)
+
+        cells.append({
+            "x": x_map[xv],
+            "y": y_map[yv],
+            "z": z_map[zv],
+            "value": int(float(row[value_col]))
+        })
+
+    return cells
